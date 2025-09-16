@@ -141,4 +141,8 @@ datasets/
 models_pkl/
 
 # static
+<<<<<<< HEAD
 .static/
+=======
+.static/
+>>>>>>> 5668968bb190380e0b12ddee9f6652f0e871a7e1
