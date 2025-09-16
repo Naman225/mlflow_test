@@ -5,6 +5,7 @@
 import os
 import warnings
 import sys
+import joblib
 
 import pandas as pd
 import numpy as np
@@ -12,8 +13,15 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet
 from urllib.parse import urlparse
-import mlflow
 import mlflow.sklearn
+import dagshub
+
+dagshub.init(repo_owner='Naman225', repo_name='mlflow_test', mlflow=True)
+
+import mlflow
+with mlflow.start_run():
+  mlflow.log_param('parameter name', 'value')
+  mlflow.log_metric('metric name', 1)
 
 import logging
 
@@ -78,11 +86,11 @@ if __name__ == "__main__":
 
         # Model registry does not work with file store
         if tracking_url_type_store != "file":
-
-            # Register the model
-            # There are other ways to use the Model Registry, which depends on the use case,
-            # please refer to the doc for more information:
-            # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-            mlflow.sklearn.log_model(lr, "model", registered_model_name="ElasticnetWineModel")
+            # The previous approach of using mlflow.sklearn.log_model
+            # failed due to an unsupported endpoint on the DagsHub MLflow server.
+            # As a workaround, we will save the model as a file and log it as a generic artifact.
+            model_path = "model.joblib"
+            joblib.dump(lr, model_path)
+            mlflow.log_artifact(model_path)
         else:
             mlflow.sklearn.log_model(lr, "model")
